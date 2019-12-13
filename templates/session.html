@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <title>Test Flask App</title>
+  </head>
+  <body>
+    <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
+    <div class="message_holder">
+    </div>
+    
+    <form action="" method="POST">
+      <input type="text" class="username" placeholder="User Name"/>
+      <input type="text" class="message" placeholder="Messages"/>
+      <input type="submit"/>
+    </form>
+
+    <table class="table_holder" style="width:25%">
+    </table>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script type="text/javascript">
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      socket.on( 'connect', () => {
+        socket.emit( 'my event', {
+          data: 'User Connected'
+        } )
+        var form = $( 'form' ).on( 'submit', function( e ) {
+          e.preventDefault()
+          let msg_input = $('input.message').val()
+          socket.emit( 'my event', {
+            msg: msg_input
+          } )
+          $('input.message').val('').focus()
+        } )
+      } )
+
+      socket.on('my response', data => {
+        console.log('Recieved: ', data)
+        const tableData = Object.keys(data).map(key => {
+          console.log(`${key}  |  ${data[key]}`)
+          return `<tr><td>${key}</td><td>${data[key]}</td></tr>`
+        }).join('')
+        console.log('New Table: ', tableData)
+        $('table.table_holder').replaceWith(`<table class="table_holder" style="width:25% display: flex">${tableData}</table>`)
+      })
+    </script>
+
+  </body>
+  </html>
